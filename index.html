@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <script>
+        let alphabets = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V', 'B', 'N', 'M'];
+        let score = localStorage.getItem('score');
+        if(!score){
+            score = {'win' : 0, 'lose' : 0};
+        }
+
+        let question = "Some Word";
+        let levels =['Very Difficult', 'Difficult', 'Medium', 'Easy', 'Very Easy'];
+
+        let guess = 0;
+
+        //
+
+        function playGame(){
+
+            let content = document.querySelector('.content');
+            content.removeChild(content.firstChild);
+            
+            let diffcultLevel = document.createElement('div');
+            let level = document.getElementById('difficult-level');
+            diffcultLevel.innerText = 'LEVEL :' + level.options[level.selectedIndex].value;
+
+            let stageDiv = document.querySelector('.stage');
+            stageDiv.removeChild(stageDiv.lastChild);
+
+            let gameInfo = document.createElement('div');
+            gameInfo.classList.add('gameInfo');
+
+            let scoreBoard = document.createElement('div');
+            scoreBoard.id = 'scoreBoard';
+            scoreBoard.innerText = 'WON : ' + score['win'] + ' LOSE : ' + score['lose'];
+            
+            let attempt = document.createElement('div');
+            attempt.id = 'attempt';
+            attempt.innerText = 'Attempt Remain : ' + (7 - guess);
+
+
+            gameInfo.append(scoreBoard, attempt, diffcultLevel)
+            stageDiv.prepend(gameInfo);
+
+            let stageImage = document.querySelector('.stage img');
+            stageImage.setAttribute('src', 'assets/hang' + guess + '.gif');
+
+            let guessField = document.createElement('div');
+            for(let i = 0; i < question.length; i++){
+                let lines = document.createElement('span');
+                lines.setAttribute('id', 'line-' + (i+1));
+                
+                (question[i] != ' ')? lines.innerText = '_' : lines.innerText = ' ';
+                guessField.appendChild(lines);
+            }
+
+            content.appendChild(guessField);
+
+            let count = 10, index = 0;
+            let keyBoard = document.createElement('div');
+            keyBoard.classList.add('keyboard');
+
+            for(let i = 0; i < 3; i++){
+                let row = document.createElement('div');
+                row.setAttribute('class', 'row' + (i+1));
+
+                for(let j = 0; j < count && index < 26; j++){
+                    let alphBtn = document.createElement('button');
+                    alphBtn.innerText = alphabets[index++];
+                    alphBtn.setAttribute('onclick', 'updateValues(this)');
+                    row.appendChild(alphBtn);
+                }
+                keyBoard.appendChild(row)
+                count--;
+            }
+
+            content.appendChild(keyBoard)
+        }
+
+        function updateValues(button){
+            let word = question.toUpperCase().split('')
+            button.classList.add('disabled');
+            debugger
+            let isPresent = word.includes(button.innerText);
+            if(isPresent){
+                let indices = word.reduce((acc, letter, index) =>{
+                    if(letter == button.innerText) acc.push(index);
+                    return acc;
+                },[]);
+                indices.forEach(lineIndex => {
+                    let field = document.querySelector('#line-' + (lineIndex + 1));
+                    field.innerText = button.innerText;
+                });
+            }
+            else{
+                guess++;
+                let stageImage = document.querySelector('.stage img');
+                stageImage.setAttribute('src', 'assets/hang' + guess + '.gif');
+                let attempt = document.querySelector('#attempt');
+                attempt.innerText = 'Attempt Remain : ' + (7 - guess);
+                if(guess == 7){
+                    alert('You Lose');
+                    window.open('/', '_self');
+                    score['lose']++;
+                    localStorage.setItem('score', score)
+                }
+            }
+        }
+
+        let gameField = document.createElement('div');
+        gameField.classList.add('gameField');
+
+        let gameTitle = document.createElement('img');
+        gameTitle.classList.add('gameTitle');
+        gameTitle.setAttribute('src', 'assets/title.png')
+        gameField.appendChild(gameTitle);
+
+        let diffcult = document.createElement('select');
+        diffcult.setAttribute('id', 'difficult-level');
+        diffcult.setAttribute('style', 'height: fit-content;');
+
+        for(let i = 0; i < levels.length; i++){
+            let level = document.createElement('option');
+            level.id = level.innerHTML = level.value = levels[i];
+            diffcult.appendChild(level);
+        }
+
+        let scores = document.createElement('div');
+        scores.innerHTML = 'Win: 0 | Lose: 0';
+
+        let stage = document.createElement('div');
+        stage.setAttribute('class', 'stage');
+        let img = document.createElement('img');
+        img.setAttribute('src', 'assets/hang7.gif');
+        stage.append(img, diffcult);
+
+        let content = document.createElement('div');
+        content.classList.add('content');
+
+        let startButton = document.createElement('button');
+        startButton.classList.add('startBtn');
+        startButton.innerText = 'Start Game'
+        startButton.addEventListener('click', playGame, true);
+
+        content.appendChild(startButton)
+
+        document.body.append(gameField, stage, content);
+    </script>
+</body>
+</html>
