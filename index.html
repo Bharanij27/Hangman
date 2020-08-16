@@ -8,18 +8,31 @@
 </head>
 <body>
     <script>
+        let gameLevel = {
+            "easy" : ["dance", "skip", "jumping", "jack", "shark", "chicken", "alligator", "chair", "robot", "head", "smile", "baseball", "bird", "happy", "scissors", "cheek", "back", "jump", "drink", "ice", "cream", "cone", "car", "airplane", "clap", "circle", "pillow", "pinch", "kick", "dog", "basketball", "sleep", "camera", "kangaroo", "arm", "eat", "prayer", "elephant", "blink", "doll", "spider", "point", "balloon", "book", "glasses", "stop", "sneeze", "mouth", "draw", "football", "telephone", "pig", "wave", "door", "tail", "turtle", "baby", "ear", "monkey", "hopscotch", "mosquito", "toothbrush", "ring"],
+            "medium" : ["ping pong", "snowball", "roof", "fly", "fang", "bicycle", "bear", "cape", "puppet","piano", "lipstick", "salute","hula hoop", "penguin", "banana peel","whisper", "popsicle", "Frankenstein","earthquake", "yo-yo", "road","rain", "alarm clock", "dog", "leash", "chop", "pajamas", "slam dunk","fiddle", "seashell", "jogseesaw", "nap", "cheerleader","blind", "beg", "shopping cart", "Michael Jackson", "limbo", "newspaper", "twist", "rhinoceros", "cow", "tickle", "fetch", "violin", "cage", "cello", "braid", "skateboard", "stairs", "trumpet", "mop", "shovel", "money", "soap", "saddle", "winktree", "Spider Man", "think"],
+            "hard" : ["peck", "windmill", "party", "dentist", "lawn mower", "softball","wig", "stain", "cuff", "sunburn", "funny", "sheet", "hair dryer", "nightmare", "iPad", "shadow", "wax", "fog", "sip", "bathroom", "scale", "taxi", "pizza", "sand", "huddle", "cowboy", "ticket", "doghouse", "stiff", "knot", "president", "owl", "wrench", "story", "whisk", "quicksand", "spine", "chess", "artist", "vest", "gingerbread", "man", "spider web", "bobsled", "lung", "washing machine", "oar", "torch", "eraser", "mini blinds", "mouse trap", "swordfish", "jar", "cramp", "flamingo", "cast", "honk", "mirror", "business trip", "chalk", "gym", "volcano"]
+        }
         let alphabets = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Z', 'X', 'C', 'V', 'B', 'N', 'M'];
-        let score = localStorage.getItem('score');
+        let score = JSON.parse(localStorage.getItem('score'));
         if(!score){
             score = {'win' : 0, 'lose' : 0};
         }
 
-        let question = "Some Word";
-        let levels =['Very Difficult', 'Difficult', 'Medium', 'Easy', 'Very Easy'];
+        let question;
+        let levels =['Hard', 'Medium', 'Easy'];
 
         let guess = 0;
+        let remian;
 
         //
+
+        function getRandomQuestion(level){
+            let currentLevel = gameLevel[level];
+            console.log(currentLevel, gameLevel, level)
+            let index = Math.floor(Math.random() * (currentLevel.length - 0) - 0);
+            return currentLevel[index].toUpperCase().split('');
+        }
 
         function playGame(){
 
@@ -29,6 +42,9 @@
             let diffcultLevel = document.createElement('div');
             let level = document.getElementById('difficult-level');
             diffcultLevel.innerText = 'LEVEL :' + level.options[level.selectedIndex].value;
+
+            question = getRandomQuestion(level.options[level.selectedIndex].value.toLowerCase());
+            remain = question.length;
 
             let stageDiv = document.querySelector('.stage');
             stageDiv.removeChild(stageDiv.lastChild);
@@ -84,7 +100,8 @@
         }
 
         function updateValues(button){
-            let word = question.toUpperCase().split('')
+            console.log(question)
+            let word = question
             button.classList.add('disabled');
             debugger
             let isPresent = word.includes(button.innerText);
@@ -95,8 +112,15 @@
                 },[]);
                 indices.forEach(lineIndex => {
                     let field = document.querySelector('#line-' + (lineIndex + 1));
-                    field.innerText = button.innerText;
+                    field.innerText = button.innerText.toLowerCase();
+                    remain--;
                 });
+                if(remain == 0){
+                    alert('You Won');
+                    window.open('/', '_self');
+                    score['win']++;
+                    localStorage.setItem('score', JSON.stringify(score))
+                }
             }
             else{
                 guess++;
@@ -108,7 +132,7 @@
                     alert('You Lose');
                     window.open('/', '_self');
                     score['lose']++;
-                    localStorage.setItem('score', score)
+                    localStorage.setItem('score', JSON.stringify(score));
                 }
             }
         }
